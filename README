@@ -1,0 +1,21 @@
+= histogram
+
+Makes histogram.  Command line tool that will output and plot them.
+
+== Examples
+
+=== Histogram some data
+
+
+
+== Details
+
+== Warnings
+
+== Installation
+
+    gem install histogram
+
+== See Also
+
+rsruby
