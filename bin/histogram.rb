@@ -1,7 +1,7 @@
 #!/usr/bin/ruby
 
 require 'optparse'
-require 'vec'
+require 'histogram'
 
 opt = {}
 opt[:type] = 'avg'
@@ -330,7 +330,7 @@ end
 
 
 vec_ar = vals_ar.map do |vals|
-  vls = VecD[*vals]
+  vals.map {|v| v.to_f }
 end
 first_vec = vec_ar.shift
 
