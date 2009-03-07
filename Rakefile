@@ -5,7 +5,6 @@ require 'rake/gempackagetask'
 require 'rake/testtask'
 require 'rake/clean'
 require 'fileutils'
-require 'email_encrypt'
 
 ###############################################
 # GLOBAL

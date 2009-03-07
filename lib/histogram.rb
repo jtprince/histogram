@@ -1,5 +1,5 @@
 
-module Enumerable
+module Histogram
 
   # Returns (min, max)
   def min_max
