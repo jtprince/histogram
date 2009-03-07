@@ -77,57 +77,10 @@ end
 # PACKAGE / INSTALL / UNINSTALL
 ###############################################
 
-def get_summary(readme)
-  string = ''
-  collect = false
-  IO.foreach(readme) do |line|
-    if collect
-      if line =~ /[^\s]/
-        string << line
-      else
-        break
-      end
-    elsif line =~ /^AXML - .*/
-      string << line
-      collect = true
-    end
-  end
-  string.gsub!("\n", " ")
-end
-
-# looks for a header, collects the paragraph after the space
-def get_section(header, file)
-  get_space = false
-  found_space = false
-  string = ''
-  IO.foreach(file) do |line|
-    if found_space
-      if line =~ /[^\s]/
-        string << line
-      else
-        break
-      end
-    elsif get_space
-      if line !~ /[^\s]/
-        found_space = true
-        get_space = false
-      end
-    elsif line =~ /^#{header}/ 
-      get_space = true
-    end
-  end
-  string.gsub!("\n", ' ')
-end
-
-def get_description(readme)
-  get_section('Description', readme)
-end
-
-
 tm = Time.now
 gemspec = Gem::Specification.new do |t|
-  description = get_description(readme)
-  summary = get_summary(readme)
+  description = "makes histograms"
+  summary = "makes histograms"
   t.platform = Gem::Platform::RUBY
   t.name = NAME
   t.version =  IO.readlines(changelog).grep(/##.*version/).pop.split(/\s+/).last.chomp
@@ -149,7 +102,7 @@ end
 desc "Create packages."
 Rake::GemPackageTask.new(gemspec) do |pkg|
   #pkg.need_zip = true
-  pkg.need_tar = true
+  #pkg.need_tar = true
 end
 
 task :remove_pkg do 
