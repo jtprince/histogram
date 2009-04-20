@@ -6,6 +6,8 @@ require 'histogram'
 MiniTest::Unit.autorun
 
 class Array
+  include Histogram
+  
   def to_floats
     self.map {|v| v.to_f }
   end
