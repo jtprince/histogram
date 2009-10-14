@@ -42,4 +42,21 @@ class HistSpec < MiniTest::Spec
     bins.must_equal [1,3,5,7,9]
     freqs.must_equal [3,0,2,2,3].to_floats
   end
+
+  it 'can take height values' do
+    obj2 = [0, 1, 1.5, 2.0, 5.0, 6.0, 7, 8, 9, 9]
+    heights = Array.new(obj2.size, 3)
+    obj = [obj2, heights]
+    bins, freqs = obj.histogram([1,3,5,7,9], :avg)
+    bins.must_equal [1,3,5,7,9].to_floats
+    freqs.must_equal [3,1,1,2,3].map {|v| v * 3}
+
+
+    obj2 = [0, 1, 1.5, 2.0, 5.0, 6.0, 7, 8, 9, 9]
+    heights = [10, 0, 0, 0, 50, 0, 0, 0, 0.2, 0.2]
+    obj = [obj2, heights]
+    (bins, freqs) = obj.histogram([1,3,5,7,9], :avg)
+    bins.must_equal [1,3,5,7,9].to_floats
+    freqs.must_equal [10, 0, 50, 0, 0.4]
+  end
 end
