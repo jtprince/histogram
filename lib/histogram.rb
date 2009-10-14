@@ -63,21 +63,12 @@ module Histogram
             break if i == (bins.size - 1)
             break_points << avg_ints(bin,bins[i+1]) 
           end
-<<<<<<< HEAD:lib/histogram.rb
-          vec.each do |val|
-            (val, height) = val.is_a?(Array) ? val : [val, 1.0]
-            if val < break_points.first
-              _freqs[0] += height
-            elsif val >= break_points.last
-              _freqs[-1] += height
-=======
           xvals.each_with_index do |val,i|
             height = yvals ? yvals[i] : 1
             if val < break_points.first
               _freqs[0] += height
             elsif val >= break_points.last
               _freqs[-1] += height 
->>>>>>> 757ea80:lib/histogram.rb
             else
               (0...(break_points.size-1)).each do |i| 
                 if val >= break_points[i] && val < break_points[i+1]
@@ -98,15 +89,9 @@ module Histogram
             end
 
           #_freqs = VecI.new(bins.size, 0)
-<<<<<<< HEAD:lib/histogram.rb
-          _freqs = Array.new(bins.size, 0.0)
-          vec.each do |val|
-            (val, height) = val.is_a?(Array) ? val : [val, 1.0]
-=======
           _freqs = Array.new(bins.size, 0)
           xvals.each_with_index do |val,i|
             height = yvals ? yvals[i] : 1
->>>>>>> 757ea80:lib/histogram.rb
             last_i = 0
             last_found_i = false
             _bins.each_with_index do |bin,i|
@@ -151,13 +136,8 @@ module Histogram
         _len = size
 
         # Create the histogram:
-<<<<<<< HEAD:lib/histogram.rb
-        vec.each do |val|
-          (val, height) = val.is_a?(Array) ? val : [val, 1.0]
-=======
         xvals.each_with_index do |val,i|
           height = yvals ? yvals[i] : 1
->>>>>>> 757ea80:lib/histogram.rb
           index = ((val-_min)*conv).floor
           if index == bins
             index -= 1
