@@ -30,10 +30,15 @@ module Histogram
   # thus, values lower than first bin are not included, but all values higher
   # than last bin are included.
   # Current implementation of bins as Array is brute force and slow
-  # (faster implementation later)
   # if other sets are given, the same bins will be used for all
   # (the min/max of all sets will be used if applicable)
   # in this case returns [bins, freqs(caller), freqs1, freqs2 ...]
+  #
+  # FRACTIONAL FREQUENCIES: if a value being considered is actually an Array
+  # (a doublet), then the first value is considered the value to histogram on
+  # (i.e. the x axis) and the last value is what will go into the height (y
+  # axis).  For normal histograms, each value recieves a '1' in frequency, but
+  # this allows for fractional values.
   def histogram(bins=5, tp=:avg, *other_sets)
     all = [self] + other_sets 
     _bins = nil
@@ -47,21 +52,22 @@ module Histogram
       when :avg
         freqs_ar = all.map do |vec|
           #_freqs = VecI.new(bins.size, 0)
-          _freqs = Array.new(bins.size, 0)
+          _freqs = Array.new(bins.size, 0.0)
           break_points = [] 
           bins.each_with_index do |bin,i|
             break if i == (bins.size - 1)
             break_points << avg_ints(bin,bins[i+1]) 
           end
           vec.each do |val|
+            (val, height) = val.is_a?(Array) ? val : [val, 1.0]
             if val < break_points.first
-              _freqs[0] += 1
+              _freqs[0] += height
             elsif val >= break_points.last
-              _freqs[-1] += 1
+              _freqs[-1] += height
             else
               (0...(break_points.size-1)).each do |i| 
                 if val >= break_points[i] && val < break_points[i+1]
-                  _freqs[i+1] += 1     
+                  _freqs[i+1] += height
                   break
                 end
               end
@@ -72,8 +78,9 @@ module Histogram
       when :min
         freqs_ar = all.map do |vec|
           #_freqs = VecI.new(bins.size, 0)
-          _freqs = Array.new(bins.size, 0)
+          _freqs = Array.new(bins.size, 0.0)
           vec.each do |val|
+            (val, height) = val.is_a?(Array) ? val : [val, 1.0]
             last_i = 0
             last_found_i = false
             _bins.each_with_index do |bin,i|
@@ -83,7 +90,7 @@ module Histogram
                 break
               end
             end
-            if last_found_i ; _freqs[last_found_i] += 1 ; end
+            if last_found_i ; _freqs[last_found_i] += height ; end
           end
           _freqs
         end
@@ -107,16 +114,17 @@ module Histogram
 
       freqs_ar = all.map do |vec|
         # initialize arrays
-        _freqs = Array.new(bins, 0)
+        _freqs = Array.new(bins, 0.0)
         _len = size
 
         # Create the histogram:
         vec.each do |val|
+          (val, height) = val.is_a?(Array) ? val : [val, 1.0]
           index = ((val-_min)*conv).floor
           if index == bins
             index -= 1
           end
-          _freqs[index] += 1
+          _freqs[index] += height
         end
         _freqs
       end
