@@ -42,6 +42,7 @@ module Histogram
     all = [self] + other_sets 
     _bins = nil
     _freqs = nil
+    have_frac_freqs = !self[0].is_a?(Numeric)
     ########################################################
     # ARRAY BINS:
     ########################################################
@@ -51,10 +52,7 @@ module Histogram
       when :avg
         freqs_ar = all.map do |vec|
 
-          (xvals, yvals) = 
-            if vec[0].is_a?(Numeric) ; [vec, nil]
-            else                     ; [vec[0], vec[1]] 
-            end
+          (xvals, yvals) = have_frac_freqs ? [vec[0], vec[1]] : [vec, nil]
 
           #_freqs = VecI.new(bins.size, 0)
           _freqs = Array.new(bins.size, 0.0)
@@ -64,7 +62,7 @@ module Histogram
             break_points << avg_ints(bin,bins[i+1]) 
           end
           xvals.each_with_index do |val,i|
-            height = yvals ? yvals[i] : 1
+            height = have_frac_freqs ? yvals[i] : 1
             if val < break_points.first
               _freqs[0] += height
             elsif val >= break_points.last
@@ -83,15 +81,12 @@ module Histogram
       when :min
         freqs_ar = all.map do |vec|
 
-          (xvals, yvals) = 
-            if vec[0].is_a?(Numeric) ; [vec, nil]
-            else                     ; [vec[0], vec[1]] 
-            end
+          (xvals, yvals) = have_frac_freqs ? [vec[0], vec[1]] : [vec, nil]
 
           #_freqs = VecI.new(bins.size, 0)
           _freqs = Array.new(bins.size, 0)
           xvals.each_with_index do |val,i|
-            height = yvals ? yvals[i] : 1
+            height = have_frac_freqs ? yvals[i] : 1
             last_i = 0
             last_found_i = false
             _bins.each_with_index do |bin,i|
@@ -110,12 +105,16 @@ module Histogram
       # NUMBER OF BINS:
       ########################################################
     else
-
+      puts "HIYA"
+      p have_frac_freqs 
 
       # Create the scaling factor
-      _min, _max = min_max
+
+      (xvals, yvals) = have_frac_freqs ? [self[0], self[1]] : [self, nil]
+      _min, _max = xvals.min_max
       other_sets.each do |vec|
-        v_min, v_max = vec.min_max
+        (xvals, yvals) = have_frac_freqs ? [vec[0], vec[1]] : [vec, nil]
+        v_min, v_max = xvals.min_max
         if v_min < _min ; _min = v_min end 
         if v_max > _max ; _max = v_max end 
       end
@@ -126,10 +125,7 @@ module Histogram
 
       freqs_ar = all.map do |vec|
 
-        (xvals, yvals) = 
-          if vec[0].is_a?(Numeric) ; [vec, nil]
-          else                     ; [vec[0], vec[1]] 
-          end
+        (xvals, yvals) = have_frac_freqs ? [vec[0], vec[1]] : [vec, nil]
 
         # initialize arrays
         _freqs = Array.new(bins, 0.0)
@@ -137,7 +133,7 @@ module Histogram
 
         # Create the histogram:
         xvals.each_with_index do |val,i|
-          height = yvals ? yvals[i] : 1
+          height = have_frac_freqs ? yvals[i] : 1
           index = ((val-_min)*conv).floor
           if index == bins
             index -= 1
