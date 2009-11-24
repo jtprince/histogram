@@ -1,0 +1,15 @@
+== 0.0.4 / 2009-11-24
+
+* supports Array and NArray equally well.
+* new require interface to automatically include Histogram in [N]Array
+* multi-histogram spec
+
+== 0.0.2
+
+* supports input of an array of parallel arrays, taking the frequency value from the second array
+
+== 0.0.1
+
+* initial release as gem
+
+

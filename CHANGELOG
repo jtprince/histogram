@@ -1,5 +1,0 @@
-## version 0.0.1
-* initial release as gem
-
-## version 0.0.2
-* supports input of an array of parallel arrays, taking the frequency value from the second array
