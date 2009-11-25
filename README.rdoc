@@ -1,0 +1,46 @@
+= histogram
+
+Makes histograms.  Command line tool, too.
+
+== Examples
+
+Typical usage:
+
+    require 'histogram/array'  # enables Array#histogram
+
+    data = [-2,1,2,3,3,3,4,5,6,6]
+
+    (bins, freqs) = data.histogram(20)                  # use 20 bins
+    (bins, freqs) = data.histogram([-3,-1,4,5,6], :avg) # custom bins
+    (bins, freqs) = data.histogram([-3,-1,4,5,6], :min) # custom bins with :min
+
+Multiple Datasets:
+      
+    # returns [bins, freq1, freq2 ...]
+    (bins, *freqs) = data.histogram(30, :avg, [3,3,4,4,5], [-1,0,0,3,3,6])
+    (ar_freqs, other1, other2) = freqs
+
+Histograms with weights/fractions:
+  
+    # histogramming with weights (uses the second array for weights)
+    w_heights = [data, [3,3,8,8,9,9,3,3,3,3]]
+    w_heights.histogram(20) 
+
+Works with NArray, too:
+  
+    require 'histogram/narray'
+    NArray.float(20).random!(3).histogram(20)
+    # => [bins, freqs]  # are both NArray.float objects
+
+
+== Commandline Examples
+
+    [coming soon]
+
+== Installation
+
+    gem install histogram
+
+== See Also
+
+aggregate[http://github.com/josephruscio/aggregate], rsruby[http://github.com/alexgutteridge/rsruby]
