@@ -1,5 +1,8 @@
 #!/usr/bin/ruby
 
+
+raise NotImplementedError, "this executable still needs some work"
+
 require 'optparse'
 require 'rubygems'
 require 'histogram'

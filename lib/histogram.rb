@@ -1,12 +1,12 @@
 
 begin
   require 'narray'
-rescue loaderror
-  class narray
+rescue LoadError
+  class NArray
   end
 end
 
-module histogram
+module Histogram
 
   # returns (min, max)
   def self.min_max(obj)
@@ -31,7 +31,7 @@ module histogram
     end
     std_dev = _sum_sq - ((_sum * _sum)/_len)
     std_dev /= ( _len > 1 ? _len-1 : 1 )
-    [_sum.to_f/_len, math.sqrt(std_dev)]
+    [_sum.to_f/_len, Math.sqrt(std_dev)]
   end
 
   def self.iqrange(obj)
@@ -69,18 +69,21 @@ module histogram
         case methd
         when :scott
           (mean, stddev) = Histogram.sample_stats(self) 
-          range / ( 3.5*stddev*(ar.size**(-1.0/3)) )
+          range / ( 3.5*stddev*(self.size**(-1.0/3)) )
         when :sturges
           (Math::log(self.size)/Math::log(2)) + 1
         when :fd
-          range / ( 2*Histogram.iqrange(self)*ar.size**(-1.0/3) ) 
+          range / ( 2*Histogram.iqrange(self)*self.size**(-1.0/3) ) 
         end
-      nbins = 1 if num <= 0
+      nbins = 1 if nbins <= 0
       nbins.ceil.to_i
     end
   end
 
   # Returns [bins, freqs]
+  # 
+  # histogram(bins, opts)
+  # histogram(opts)
   #
   # Options:
   #
@@ -95,6 +98,8 @@ module histogram
   #              :min      bins specify the minima for binning
   #
   #     :bin_width => <float> width of a bin (overrides :bins)
+  #     
+  #     :other_sets => an array of other sets to histogram
   #
   # Examples 
   #
@@ -102,10 +107,10 @@ module histogram
   #    ar = [-2,1,2,3,3,3,4,5,6,6]
   #    # these return: [bins, freqencies]
   #    ar.histogram(20)                  # use 20 bins
-  #    ar.histogram([-3,-1,4,5,6], :avg) # custom bins
+  #    ar.histogram([-3,-1,4,5,6], :tp => :avg) # custom bins
   #    
   #    # returns [bins, freq1, freq2 ...]
-  #    (bins, *freqs) = ar.histogram(30, :avg, [3,3,4,4,5], [-1,0,0,3,3,6])
+  #    (bins, *freqs) = ar.histogram(30, :tp => :avg, :other_sets => [3,3,4,4,5], [-1,0,0,3,3,6])
   #    (ar_freqs, other1, other2) = freqs
   #
   #    # histogramming with heights (uses the second array for heights)
@@ -135,14 +140,8 @@ module histogram
   #   to histogram and the next array is the y values (or intensities) to be
   #   applied in the histogram. (checks for !first_value.is_a?(Numeric))
   # * Return value
-  def histogram(opts={})
-    DEFAULT_OPTS = {
-      :bins => nil,
-      :tp => :avg,
-      :other_sets => []
-    }
-
-    make_freqs = lambda do |obj, len|
+  def histogram(*args)
+    make_freqs_proc = lambda do |obj, len|
       if obj.is_a?(Array)
         Array.new(len, 0.0)
       elsif obj.is_a?(NArray)
@@ -150,11 +149,55 @@ module histogram
       end
     end
 
+    if args.size == 2
+      (bins, opts) = args
+    elsif args.size == 1
+      arg = args.shift
+      if arg.is_a?(Hash)
+        opts = arg
+        puts "ITs a hash!"
+      else
+        bins = arg
+        opts = {}
+      end
+    end
+
+    opts = ({ :tp => :avg, :other_sets => [] }).merge(opts)
+
+    bins = opts[:bins] if bins.equal?(opts)
+    bins = opts[:bins] if opts[:bins]
+
+    tp = opts[:tp]
+    other_sets = opts[:other_sets]
+
+    bins_array_like = bins.kind_of?(Array) || bins.kind_of?(NArray) || opts[:bin_width]
     all = [self] + other_sets 
+
+    if bins.is_a?(Symbol)
+      bins = number_bins(bins)
+    end
+
+    have_frac_freqs = !self[0].is_a?(Numeric)
+
+    # we need to know the limits of the bins if we need to define our own bins
+    if opts[:bin_width] || !bins_array_like 
+      (xvals, yvals) = have_frac_freqs ? [self[0], self[1]] : [self, nil]
+      _min, _max = Histogram.min_max(xvals)
+      other_sets.each do |vec|
+        (xvals, yvals) = have_frac_freqs ? [vec[0], vec[1]] : [vec, nil]
+        v_min, v_max = Histogram.min_max(xvals)
+        if v_min < _min ; _min = v_min end 
+        if v_max > _max ; _max = v_max end 
+      end
+      if opts[:bin_width]
+        bins = []
+        _min.step(_max, opts[:bin_width]) {|v| bins << v }
+      end
+    end
+
     _bins = nil
     _freqs = nil
-    have_frac_freqs = !self[0].is_a?(Numeric)
-    if bins.kind_of?(Array) || bins.kind_of?(NArray)
+    if bins_array_like
       ########################################################
       # ARRAY BINS:
       ########################################################
@@ -170,7 +213,7 @@ module histogram
 
           (xvals, yvals) = have_frac_freqs ? [vec[0], vec[1]] : [vec, nil]
 
-          _freqs = make_freqs.call(xvals, bins.size)
+          _freqs = make_freqs_proc.call(xvals, bins.size)
 
           break_points = [] 
           (0...(bins.size)).each do |i|
@@ -202,7 +245,7 @@ module histogram
           (xvals, yvals) = have_frac_freqs ? [vec[0], vec[1]] : [vec, nil]
 
           #_freqs = VecI.new(bins.size, 0)
-          _freqs = make_freqs.call(xvals, bins.size)
+          _freqs = make_freqs_proc.call(xvals, bins.size)
           (0...(xvals.size)).each do |i|
             val = xvals[i]
             height = have_frac_freqs ? yvals[i] : 1
@@ -220,20 +263,11 @@ module histogram
           _freqs
         end
       end
+    else
       ########################################################
       # NUMBER OF BINS:
       ########################################################
-    else
       # Create the scaling factor
-
-      (xvals, yvals) = have_frac_freqs ? [self[0], self[1]] : [self, nil]
-      _min, _max = Histogram.min_max(xvals)
-      other_sets.each do |vec|
-        (xvals, yvals) = have_frac_freqs ? [vec[0], vec[1]] : [vec, nil]
-        v_min, v_max = Histogram.min_max(xvals)
-        if v_min < _min ; _min = v_min end 
-        if v_max > _max ; _max = v_max end 
-      end
 
       dmin = _min.to_f
       conv = bins.to_f/(_max - _min)
@@ -250,7 +284,7 @@ module histogram
         (xvals, yvals) = have_frac_freqs ? [vec[0], vec[1]] : [vec, nil]
 
         # initialize arrays
-        _freqs = make_freqs.call(xvals, bins)
+        _freqs = make_freqs_proc.call(xvals, bins)
         _len = size
 
         # Create the histogram:
