@@ -34,13 +34,15 @@ module Histogram
     [_sum.to_f/_len, Math.sqrt(std_dev)]
   end
 
+  # still need to spec this method!
   def self.iqrange(obj)
     srted = obj.sort
     sz = srted.size
     if sz % 2 == 0
       median_index_hi = sz / 2
-      median_index_lo = sz / 2 - 1
-      dist = sz / 2 
+      median_index_lo = (sz / 2) - 1
+      # need to check this line for accuracy:
+      dist = median_index_hi / 2 
       fq = srted[median_index_hi + dist]
       tq = srted[median_index_lo - dist]
     else
@@ -149,9 +151,10 @@ module Histogram
       end
     end
 
-    if args.size == 2
+    case args.size
+    when 2
       (bins, opts) = args
-    elsif args.size == 1
+    when 1
       arg = args.shift
       if arg.is_a?(Hash)
         opts = arg
@@ -160,12 +163,17 @@ module Histogram
         bins = arg
         opts = {}
       end
+    when 0
+      opts = {}
+      bins = nil
+    else
+      raise ArgumentError, "accepts no more than 2 args"
     end
 
     opts = ({ :tp => :avg, :other_sets => [] }).merge(opts)
 
-    bins = opts[:bins] if bins.equal?(opts)
     bins = opts[:bins] if opts[:bins]
+    bins = :fd unless bins
 
     tp = opts[:tp]
     other_sets = opts[:other_sets]
@@ -175,6 +183,8 @@ module Histogram
 
     if bins.is_a?(Symbol)
       bins = number_bins(bins)
+      puts "HIH"
+      p bins
     end
 
     have_frac_freqs = !self[0].is_a?(Numeric)
