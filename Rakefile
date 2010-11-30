@@ -10,9 +10,9 @@ gemspec = Gem::Specification.new do |s|
   s.name = NAME
   s.authors = ["John T. Prince"]
   s.email = "jtprince@gmail.com"
-  s.homepage = "http://jtprince.github.com/" + NAME
+  s.homepage = "https://github.com/jtprince/histogram"
   s.summary = "histograms data in different ways"
-  s.description = "gives Arrays or NArrays the ability to 'histogram'.  Also see the 'aggregate' gem.  Simple command line utility also included"
+  s.description = "gives Arrays or NArrays the ability to 'histogram'.  Also see the 'aggregate' gem."
   s.add_development_dependency("narray")
   s.add_development_dependency("spec-more")
 end
@@ -44,4 +44,3 @@ task :default => :spec
 
 task :build => :gemspec
 
-# credit: Rakefile modeled after Jeweler's
