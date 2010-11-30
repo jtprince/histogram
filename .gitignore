@@ -1,4 +1,4 @@
 *.swp
 pkg
 histogram.gemspec
-rdoc
+doc

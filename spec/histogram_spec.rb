@@ -92,7 +92,7 @@ end
 
 begin
   require 'histogram/narray'
-  xdescribe 'histogramming an NArray' do
+  describe 'histogramming an NArray' do
     before do
       TestArrays.each_with_index do |ar,i|
         instance_variable_set("@obj#{i+1}", NArray.to_na(ar).to_f)

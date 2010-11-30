@@ -158,7 +158,6 @@ module Histogram
       arg = args.shift
       if arg.is_a?(Hash)
         opts = arg
-        puts "ITs a hash!"
       else
         bins = arg
         opts = {}
@@ -183,8 +182,6 @@ module Histogram
 
     if bins.is_a?(Symbol)
       bins = number_bins(bins)
-      puts "HIH"
-      p bins
     end
 
     have_frac_freqs = !self[0].is_a?(Numeric)
