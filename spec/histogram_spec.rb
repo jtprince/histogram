@@ -59,6 +59,15 @@ shared 'a histogram' do
     bins.enums [1,3,5,7,9].to_f
     freqs.enums [10, 0, 50, 0, 0.4]
   end
+
+  it 'works with given min and max vals' do
+    [1,2,3,3,3,4,5,6,7,8].histogram(4, :min => 2, :tp => :min).first.first.is 2.0
+    [1,2,3,3,3,4,5,6,7,8].histogram(4, :max => 7, :tp => :min).first.last.is 5.5 # since the bin-width is 1.5
+    bs = [1,2,3,3,3,4,5,6,7,8].histogram(4, :min => 2, :max => 7, :tp => :min)
+    bs.first.first.is 2.0
+    bs.first.last.is 5.75 # bin-width of 1.25
+  end
+
 end
 
 TestArrays = [[0,1,2,3,4,5,6,7,8,9,10], [0, 1, 1.5, 2.0, 5.0, 6.0, 7, 8, 9, 9],

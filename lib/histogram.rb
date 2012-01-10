@@ -100,6 +100,8 @@ module Histogram
   #              :min      bins specify the minima for binning
   #
   #     :bin_width => <float> width of a bin (overrides :bins)
+  #     :min => <float> # explicitly set the min
+  #     :max => <float> # explicitly set the max val
   #     
   #     :other_sets => an array of other sets to histogram
   #
@@ -189,10 +191,12 @@ module Histogram
     # we need to know the limits of the bins if we need to define our own bins
     if opts[:bin_width] || !bins_array_like 
       (xvals, yvals) = have_frac_freqs ? [self[0], self[1]] : [self, nil]
-      _min, _max = Histogram.min_max(xvals)
+      _min = opts[:min] || xvals.min
+      _max = opts[:max] || xvals.max
       other_sets.each do |vec|
         (xvals, yvals) = have_frac_freqs ? [vec[0], vec[1]] : [vec, nil]
-        v_min, v_max = Histogram.min_max(xvals)
+        v_min = opts[:min] || xvals.min
+        v_max = opts[:max] || xvals.max
         if v_min < _min ; _min = v_min end 
         if v_max > _max ; _max = v_max end 
       end
