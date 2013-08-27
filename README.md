@@ -1,3 +1,5 @@
+[![Gem Version](https://badge.fury.io/rb/histogram.png)](http://badge.fury.io/rb/histogram)
+
 # histogram
 
 Generates histograms similar to R's hist and numpy's histogram functions.
@@ -57,4 +59,4 @@ all the data sets.  That way, the resulting frequencies will all line up:
 
 ## See Also
 
-aggregate(http://github.com/josephruscio/aggregate), rsruby(http://github.com/alexgutteridge/rsruby)
+[aggregate](http://github.com/josephruscio/aggregate), [rserve-client](http://rubygems.org/gems/rserve-client), [rsruby](http://github.com/alexgutteridge/rsruby)
