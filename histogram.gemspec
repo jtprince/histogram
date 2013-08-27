@@ -23,6 +23,7 @@ Gem::Specification.new do |spec|
     "rake ~> 10.1.0",
     "simplecov ~> 0.7.1",
     "rspec ~> 2.13.0",
+    "narray",
   ].each do |argline|
     spec.add_development_dependency *argline.split(' ', 2).compact
   end

@@ -16,7 +16,7 @@ and the wikipedia {histogram article}[http://en.wikipedia.org/wiki/Histogram].
     # by default, uses Freedman-Diaconis method to calculate optimal number of bins
     # and the bin values are midpoints between the bin edges 
     (bins, freqs) = data.histogram 
-    # equivalent to:  data.histogram(:fd, :tp => :avg)  
+    # equivalent to:  data.histogram(:fd, :bin_boundary => :avg)  
 
 === Multiple types of binning behavior:
 
@@ -26,7 +26,7 @@ and the wikipedia {histogram article}[http://en.wikipedia.org/wiki/Histogram].
     (bins, freqs) = data.histogram([-3,-1,4,5,6])              # custom bins
 
     # bins are midpoints, but can be set as minima
-    (bins, freqs) = data.histogram([-3,-1,4,5,6], :tp => :min) # custom bins with :min
+    (bins, freqs) = data.histogram([-3,-1,4,5,6], :bin_boundary => :min) # custom bins with :min
 
     # can also set the bin_width (which interpolates between the min and max of the set)
     (bins, freqs) = data.histogram(:bin_width => 0.5)
@@ -37,13 +37,12 @@ Sometimes, we want to create histograms where the bins are calculated based on
 all the data sets.  That way, the resulting frequencies will all line up:
 
     # returns [bins, freq1, freq2 ...]
-    (bins, *freqs) = data.histogram(30, :other_sets => [[3,3,4,4,5], [-1,0,0,3,3,6]])
+    (bins, *freqs) = set1.histogram(30, :other_sets => [[3,3,4,4,5], [-1,0,0,3,3,6]])
 
 === Histograms with weights/fractions:
   
-    # histogramming with weights (uses the second array for weights)
-    w_heights = [data, [3,3,8,8,9,9,3,3,3,3]]
-    w_heights.histogram(20)
+    # histogramming with weights
+    data.histogram(20, :weights => [3,3,8,8,9,9,3,3,3,3])
 
 === Works great with {NArray}[http://narray.rubyforge.org/], too:
   

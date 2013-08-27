@@ -117,9 +117,8 @@ module Histogram
   #    (bins, *freqs) = ar.histogram(30, :bin_boundary => :avg, :other_sets => [3,3,4,4,5], [-1,0,0,3,3,6])
   #    (ar_freqs, other1, other2) = freqs
   #
-  #    # histogramming with heights (uses the second array for heights)
-  #    w_heights = [ar, [3,3,8,8,9,9,3,3,3,3]]
-  #    w_heights.histogram(20) 
+  #    # histogramming with weights
+  #    w_weights.histogram(20, :weights => [3,3,8,8,9,9,3,3,3,3]) 
   #
   #    # with NArray
   #    require 'histogram/narray'
@@ -140,10 +139,8 @@ module Histogram
   #   It is useful if you just want a certain number of bins and for the sets
   #   to share the exact same bins. In this case returns [bins, freqs(caller),
   #   freqs1, freqs2 ...]
-  # * Can also deal with parallel arrays where the first array is the x values
-  #   to histogram and the next array is the y values (or intensities) to be
-  #   applied in the histogram. (checks for !first_value.is_a?(Numeric))
-  # * Return value
+  # * Can also deal with weights.  :weights should provide parallel arrays to
+  #   the caller and any :other_sets provided.   
   def histogram(*args)
     make_freqs_proc = lambda do |obj, len|
       if obj.is_a?(Array)
@@ -186,20 +183,24 @@ module Histogram
       bins = number_bins(bins)
     end
 
-    have_frac_freqs = !self[0].is_a?(Numeric)
+    weights = 
+      if opts[:weights]
+        have_frac_freqs = true
+        opts[:weights][0].is_a?(Numeric) ? [ opts[:weights] ] : opts[:weights]
+      else
+        []
+      end
 
     # we need to know the limits of the bins if we need to define our own bins
     if opts[:bin_width] || !bins_array_like 
-      (xvals, yvals) = have_frac_freqs ? [self[0], self[1]] : [self, nil]
-      _min = opts[:min] || xvals.min
-      _max = opts[:max] || xvals.max
-      other_sets.each do |vec|
-        (xvals, yvals) = have_frac_freqs ? [vec[0], vec[1]] : [vec, nil]
-        v_min = opts[:min] || xvals.min
-        v_max = opts[:max] || xvals.max
-        if v_min < _min ; _min = v_min end 
-        if v_max > _max ; _max = v_max end 
-      end
+      calc_min, calc_max = 
+        unless opts[:min] && opts[:max]
+          (mins, maxs) = all.map(&:minmax).transpose
+          [mins.min, maxs.max]
+        end
+      _min = opts[:min] || calc_min
+      _max = opts[:max] || calc_max
+
       if opts[:bin_width]
         bins = []
         _min.step(_max, opts[:bin_width]) {|v| bins << v }
@@ -220,9 +221,7 @@ module Histogram
         end
       case bin_boundary
       when :avg
-        freqs_ar = all.map do |vec|
-
-          (xvals, yvals) = have_frac_freqs ? [vec[0], vec[1]] : [vec, nil]
+        freqs_ar = all.zip(weights).map do |xvals, yvals|
 
           _freqs = make_freqs_proc.call(xvals, bins.size)
 
@@ -251,9 +250,7 @@ module Histogram
           _freqs 
         end
       when :min
-        freqs_ar = all.map do |vec|
-
-          (xvals, yvals) = have_frac_freqs ? [vec[0], vec[1]] : [vec, nil]
+        freqs_ar = all.zip(weights).map do |xvals, yvals|
 
           #_freqs = VecI.new(bins.size, 0)
           _freqs = make_freqs_proc.call(xvals, bins.size)
@@ -290,9 +287,7 @@ module Histogram
           NArray.float(bins)
         end
 
-      freqs_ar = all.map do |vec|
-
-        (xvals, yvals) = have_frac_freqs ? [vec[0], vec[1]] : [vec, nil]
+      freqs_ar = all.zip(weights).map do |xvals, yvals|
 
         # initialize arrays
         _freqs = make_freqs_proc.call(xvals, bins)
