@@ -24,4 +24,5 @@ Gem::Specification.new do |spec|
     "simplecov"
   ].each do |argline|
     spec.add_development_dependency *argline.split(' ', 2).compact
+  end
 end
