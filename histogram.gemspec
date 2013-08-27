@@ -20,8 +20,9 @@ Gem::Specification.new do |spec|
 
 
   [ "bundler ~> 1.3", 
-    "rake",
-    "simplecov"
+    "rake ~> 10.1.0",
+    "simplecov ~> 0.7.1",
+    "rspec ~> 2.13.0",
   ].each do |argline|
     spec.add_development_dependency *argline.split(' ', 2).compact
   end

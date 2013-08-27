@@ -96,8 +96,8 @@ module Histogram
   #              <Integer> give the number of bins
   #              <Array>   specify the bins themselves
   #
-  #     :tp   => :avg      boundary is the avg between bins (default)
-  #              :min      bins specify the minima for binning
+  #     :bin_boundary  => :avg      boundary is the avg between bins (default)
+  #                       :min      bins specify the minima for binning
   #
   #     :bin_width => <float> width of a bin (overrides :bins)
   #     :min => <float> # explicitly set the min
@@ -111,10 +111,10 @@ module Histogram
   #    ar = [-2,1,2,3,3,3,4,5,6,6]
   #    # these return: [bins, freqencies]
   #    ar.histogram(20)                  # use 20 bins
-  #    ar.histogram([-3,-1,4,5,6], :tp => :avg) # custom bins
+  #    ar.histogram([-3,-1,4,5,6], :bin_boundary => :avg) # custom bins
   #    
   #    # returns [bins, freq1, freq2 ...]
-  #    (bins, *freqs) = ar.histogram(30, :tp => :avg, :other_sets => [3,3,4,4,5], [-1,0,0,3,3,6])
+  #    (bins, *freqs) = ar.histogram(30, :bin_boundary => :avg, :other_sets => [3,3,4,4,5], [-1,0,0,3,3,6])
   #    (ar_freqs, other1, other2) = freqs
   #
   #    # histogramming with heights (uses the second array for heights)
@@ -171,12 +171,12 @@ module Histogram
       raise ArgumentError, "accepts no more than 2 args"
     end
 
-    opts = ({ :tp => :avg, :other_sets => [] }).merge(opts)
+    opts = ({ :bin_boundary => :avg, :other_sets => [] }).merge(opts)
 
     bins = opts[:bins] if opts[:bins]
     bins = :fd unless bins
 
-    tp = opts[:tp]
+    bin_boundary = opts[:bin_boundary]
     other_sets = opts[:other_sets]
 
     bins_array_like = bins.kind_of?(Array) || bins.kind_of?(NArray) || opts[:bin_width]
@@ -218,7 +218,7 @@ module Histogram
         elsif bins.is_a?(NArray)
           bins.to_f
         end
-      case tp
+      case bin_boundary
       when :avg
         freqs_ar = all.map do |vec|
 
@@ -313,7 +313,7 @@ module Histogram
 
       # Create the bins:
       iconv = 1.0/conv
-      case tp
+      case bin_boundary
       when :avg
         (0...bins).each do |i|
           _bins[i] = ((i+0.5) * iconv) + dmin
