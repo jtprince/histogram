@@ -4,8 +4,8 @@ require 'histogram'
 
 RSpec::Matchers.define :be_within_rounding_error_of do |expected|
   match do |actual|
-    (act, exp) = [actual, expected].map {|ar| ar.map {|v| v.to_f.round(8) } }
-    act.should == exp
+    (act, exp) = [actual, expected].map {|ar| ar.collect {|v| v.to_f.round(8) } }
+    act.to_a.should == exp.to_a
   end
 end
 
@@ -107,17 +107,20 @@ describe Histogram do
     it_behaves_like 'something that can histogram'
   end
 
-  begin
-    describe NArray do
-      data.each do |obj, ar|
-        let(obj) { NArray.to_na(ar).to_f.extend(Histogram) }
-      end
-      it_behaves_like 'something that can histogram'
+  have_narray = 
+    begin
+      require 'narray'
+      NArray.respond_to?(:to_na)
+      true
+    rescue
+      false
     end
-  rescue
-    puts ""
-    puts "YOU NEED NArray installed to run NArray tests!"
-    puts ""
+
+  describe NArray, :pending => !have_narray do
+    data.each do |obj, ar|
+      let(obj) { NArray.to_na(ar).to_f.extend(Histogram) }
+    end
+    it_behaves_like 'something that can histogram'
   end
 
   describe 'calculating bins' do

@@ -1,22 +1,22 @@
 
-begin
-  require 'narray'
-rescue LoadError
-  class NArray
-  end
+class NArray 
 end
 
 module Histogram
 
   # returns (min, max)
-  def self.min_max(obj)
-    mn = obj[0]
-    mx = obj[0]
-    obj.each do |val|
-      if val < mn then mn = val end
-      if val > mx then mx = val end
+  def self.minmax(obj)
+    if obj.is_a?(Array)
+      obj.minmax
+    else
+      mn = obj[0]
+      mx = obj[0]
+      obj.each do |val|
+        if val < mn then mn = val end
+        if val > mx then mx = val end
+      end
+      [mn, mx]
     end
-    [mn, mx]
   end
 
   # returns (mean, standard_dev)
@@ -195,7 +195,8 @@ module Histogram
     if opts[:bin_width] || !bins_array_like 
       calc_min, calc_max = 
         unless opts[:min] && opts[:max]
-          (mins, maxs) = all.map(&:minmax).transpose
+          (mins, maxs) = all.map {|ar| Histogram.minmax(ar) }.transpose
+        end
           [mins.min, maxs.max]
         end
       _min = opts[:min] || calc_min
