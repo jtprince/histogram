@@ -4,54 +4,56 @@ end
 
 module Histogram
 
-  # returns (min, max)
-  def self.minmax(obj)
-    if obj.is_a?(Array)
-      obj.minmax
-    else
-      mn = obj[0]
-      mx = obj[0]
-      obj.each do |val|
-        if val < mn then mn = val end
-        if val > mx then mx = val end
+  class << self
+    # returns (min, max)
+    def minmax(obj)
+      if obj.is_a?(Array)
+        obj.minmax
+      else
+        mn = obj[0]
+        mx = obj[0]
+        obj.each do |val|
+          if val < mn then mn = val end
+          if val > mx then mx = val end
+        end
+        [mn, mx]
       end
-      [mn, mx]
     end
-  end
 
-  # returns (mean, standard_dev)
-  # if size == 0 returns [nil, nil]
-  def self.sample_stats(obj)
-    _len = obj.size
-    return [nil, nil] if _len == 0
-    _sum = 0.0 ; _sum_sq = 0.0
-    obj.each do |val|
-      _sum += val
-      _sum_sq += val * val
+    # returns (mean, standard_dev)
+    # if size == 0 returns [nil, nil]
+    def sample_stats(obj)
+      _len = obj.size
+      return [nil, nil] if _len == 0
+      _sum = 0.0 ; _sum_sq = 0.0
+      obj.each do |val|
+        _sum += val
+        _sum_sq += val * val
+      end
+      std_dev = _sum_sq - ((_sum * _sum)/_len)
+      std_dev /= ( _len > 1 ? _len-1 : 1 )
+      [_sum.to_f/_len, Math.sqrt(std_dev)]
     end
-    std_dev = _sum_sq - ((_sum * _sum)/_len)
-    std_dev /= ( _len > 1 ? _len-1 : 1 )
-    [_sum.to_f/_len, Math.sqrt(std_dev)]
-  end
 
-  # still need to spec this method!
-  def self.iqrange(obj)
-    srted = obj.sort
-    sz = srted.size
-    if sz % 2 == 0
-      median_index_hi = sz / 2
-      median_index_lo = (sz / 2) - 1
-      # need to check this line for accuracy:
-      dist = median_index_hi / 2 
-      fq = srted[median_index_hi + dist]
-      tq = srted[median_index_lo - dist]
-    else
-      median_index = sz / 2
-      dist = (median_index + 1) / 2
-      fq = srted[median_index - dist]
-      tq = srted[median_index + dist]
+    # still need to spec this method!
+    def iqrange(obj)
+      srted = obj.sort
+      sz = srted.size
+      if sz % 2 == 0
+        median_index_hi = sz / 2
+        median_index_lo = (sz / 2) - 1
+        # need to check this line for accuracy:
+        dist = median_index_hi / 2 
+        fq = srted[median_index_hi + dist]
+        tq = srted[median_index_lo - dist]
+      else
+        median_index = sz / 2
+        dist = (median_index + 1) / 2
+        fq = srted[median_index - dist]
+        tq = srted[median_index + dist]
+      end
+      (tq - fq).to_f
     end
-    (tq - fq).to_f
   end
 
   # returns(integer) takes :scott|:sturges|:fd|:middle
@@ -62,9 +64,9 @@ module Histogram
   # implementation}[http://www.mathworks.com/matlabcentral/fileexchange/21033-calculate-number-of-bins-for-histogram]
   # and the {histogram page on
   # wikipedia}[http://en.wikipedia.org/wiki/Histogram]
-  def number_bins(methd=:fd)
+  def number_of_bins(methd=:fd)
     if methd == :middle
-      [:scott, :sturges, :fd].map {|v| number_bins(v) }.sort[1]
+      [:scott, :sturges, :fd].map {|v| number_of_bins(v) }.sort[1]
     else
       range = (self.max - self.min).to_f
       nbins = 
@@ -180,7 +182,7 @@ module Histogram
     all = [self] + other_sets 
 
     if bins.is_a?(Symbol)
-      bins = number_bins(bins)
+      bins = number_of_bins(bins)
     end
 
     weights = 
@@ -196,16 +198,15 @@ module Histogram
       calc_min, calc_max = 
         unless opts[:min] && opts[:max]
           (mins, maxs) = all.map {|ar| Histogram.minmax(ar) }.transpose
-        end
           [mins.min, maxs.max]
         end
-      _min = opts[:min] || calc_min
-      _max = opts[:max] || calc_max
+    end
+    _min = opts[:min] || calc_min
+    _max = opts[:max] || calc_max
 
-      if opts[:bin_width]
-        bins = []
-        _min.step(_max, opts[:bin_width]) {|v| bins << v }
-      end
+    if opts[:bin_width]
+      bins = []
+      _min.step(_max, opts[:bin_width]) {|v| bins << v }
     end
 
     _bins = nil

@@ -1,4 +1,3 @@
-
 require 'histogram'
 
 class Array

@@ -1,14 +1,12 @@
-= histogram
+# histogram
 
-Generates histograms similar to R's hist and numpy's histogram functions.  The
-interface is relatively stable and a decent test/spec suite is in place, but
-please consider this alpha software. Inspired by {Richard Cottons's matlab
-implementation}[http://www.mathworks.com/matlabcentral/fileexchange/21033-calculate-number-of-bins-for-histogram]
-and the wikipedia {histogram article}[http://en.wikipedia.org/wiki/Histogram].
+Generates histograms similar to R's hist and numpy's histogram functions.
+Inspired somewhat by [Richard Cottons's matlab implementation](http://www.mathworks.com/matlabcentral/fileexchange/21033-calculate-number-of-bins-for-histogram)
+and the wikipedia [histogram article](http://en.wikipedia.org/wiki/Histogram).
 
-== Examples
+## Examples
 
-=== Typical usage:
+### Typical usage:
 
     require 'histogram/array'  # enables Array#histogram
 
@@ -18,12 +16,14 @@ and the wikipedia {histogram article}[http://en.wikipedia.org/wiki/Histogram].
     (bins, freqs) = data.histogram 
     # equivalent to:  data.histogram(:fd, :bin_boundary => :avg)  
 
-=== Multiple types of binning behavior:
+### Multiple types of binning behavior:
 
     # :fd, :sturges, :scott, or :middle  (median value between the three methods)
     data.histogram(:middle)
     (bins, freqs) = data.histogram(20)                         # use 20 bins
     (bins, freqs) = data.histogram([-3,-1,4,5,6])              # custom bins
+
+    (bins, freqs) = data.histogram(10, :min => 2, :max => 12)  # 10 bins with set min and max
 
     # bins are midpoints, but can be set as minima
     (bins, freqs) = data.histogram([-3,-1,4,5,6], :bin_boundary => :min) # custom bins with :min
@@ -31,7 +31,7 @@ and the wikipedia {histogram article}[http://en.wikipedia.org/wiki/Histogram].
     # can also set the bin_width (which interpolates between the min and max of the set)
     (bins, freqs) = data.histogram(:bin_width => 0.5)
 
-=== Multiple Datasets:
+### Multiple Datasets:
       
 Sometimes, we want to create histograms where the bins are calculated based on
 all the data sets.  That way, the resulting frequencies will all line up:
@@ -39,22 +39,22 @@ all the data sets.  That way, the resulting frequencies will all line up:
     # returns [bins, freq1, freq2 ...]
     (bins, *freqs) = set1.histogram(30, :other_sets => [[3,3,4,4,5], [-1,0,0,3,3,6]])
 
-=== Histograms with weights/fractions:
+### Histograms with weights/fractions:
   
     # histogramming with weights
     data.histogram(20, :weights => [3,3,8,8,9,9,3,3,3,3])
 
-=== Works great with {NArray}[http://narray.rubyforge.org/], too:
+### Works with NArray objects
   
-    require 'histogram/narray'  # enables NArray#histogram
+    require 'histogram/narray'    # enables NArray#histogram
     # if the calling object is an NArray, the output is two NArrays:
-    NArray.float(20).random!(3).histogram(20)
-    # => [bins, freqs]  # are both NArray.float objects
+    (bins, freqs) = NArray.float(20).random!(3).histogram(20)
+    # bins and freqs are both NArray.float objects
 
-== Installation
+## Installation
 
     gem install histogram
 
-== See Also
+## See Also
 
-aggregate[http://github.com/josephruscio/aggregate], rsruby[http://github.com/alexgutteridge/rsruby]
+aggregate(http://github.com/josephruscio/aggregate), rsruby(http://github.com/alexgutteridge/rsruby)

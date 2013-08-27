@@ -129,7 +129,7 @@ describe Histogram do
       [:sturges, :scott, :fd, :middle].zip(answers) do |mth, answ|
         ar = [0,1,2,2,2,2,2,3,3,3,3,3,3,3,3,3,5,5,9,9,10,20,15,15,15,16,17].extend(Histogram)
         # these are merely frozen, not checked to see if correct
-        ar.number_bins(mth).should == answ
+        ar.number_of_bins(mth).should == answ
       end
     end
   end
