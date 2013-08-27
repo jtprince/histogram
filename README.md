@@ -6,7 +6,9 @@ Generates histograms similar to R's hist and numpy's histogram functions.
 Inspired somewhat by [Richard Cottons's matlab implementation](http://www.mathworks.com/matlabcentral/fileexchange/21033-calculate-number-of-bins-for-histogram)
 and the wikipedia [histogram article](http://en.wikipedia.org/wiki/Histogram).
 
-## Examples
+## NOTE
+
+The implementations for finding a bin number from the data itself have not yet been tested for correctness. (i.e., :fd, :sturges, or :scott)
 
 ### Typical usage:
 
