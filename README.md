@@ -17,15 +17,16 @@ then you may not have been getting the optimal bin size by default.
     require 'histogram/array'  # enables Array#histogram
 
     data = [0,1,2,2,2,2,2,3,3,3,3,3,3,3,3,3,5,5,9,9,10]
-    # by default, uses Freedman-Diaconis method to calculate optimal number of bins
+    # by default, uses Scott's method to calculate optimal number of bins
     # and the bin values are midpoints between the bin edges 
     (bins, freqs) = data.histogram 
     # equivalent to:  data.histogram(:fd, :bin_boundary => :avg)  
 
 ### Multiple types of binning behavior:
 
-    # :fd, :sturges, :scott, or :middle  (median value between the three methods)
-    data.histogram(:middle)
+    # :scott, :fd, :sturges, or :middle  
+    data.histogram(:fd)  # use Freedman-Diaconis method to calc num bins
+    data.histogram(:middle) # (median value between the three methods)
     (bins, freqs) = data.histogram(20)                         # use 20 bins
     (bins, freqs) = data.histogram([-3,-1,4,5,6])              # custom bins
 

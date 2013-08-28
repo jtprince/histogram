@@ -3,6 +3,8 @@ class NArray
 end
 
 module Histogram
+  DEFAULT_BIN_METHOD = :scott
+  DEFAULT_QUARTILE_METHOD = :moore_mccabe
 
   class << self
     # returns (min, max)
@@ -42,7 +44,7 @@ module Histogram
     #     :sorted => false
     #   
     def iqrange(obj, opts={})
-      opt = {method: :moore_mccabe, sorted: false}.merge( opts )
+      opt = {method: DEFAULT_QUARTILE_METHOD, sorted: false}.merge( opts )
       srted = opt[:sorted] ? obj : obj.sort 
       sz = srted.size
       answer = 
@@ -76,7 +78,7 @@ module Histogram
   # implementation}[http://www.mathworks.com/matlabcentral/fileexchange/21033-calculate-number-of-bins-for-histogram]
   # and the {histogram page on
   # wikipedia}[http://en.wikipedia.org/wiki/Histogram]
-  def number_of_bins(methd=:fd, quartile_method=:moore_mccabe)
+  def number_of_bins(methd=DEFAULT_BIN_METHOD, quartile_method=DEFAULT_QUARTILE_METHOD)
     if methd == :middle
       [:scott, :sturges, :fd].map {|v| number_of_bins(v) }.sort[1]
     else
@@ -103,9 +105,9 @@ module Histogram
   #
   # Options:
   #
-  #     :bins => :fd       Freedman-Diaconis range/(2*iqrange *n^(-1/3)) (default)
-  #              :scott    Scott's method    range/(3.5σ * n^(-1/3))
-  #              :sturges  Sturges' method   log_2(n) + 1 (overly smooth as n exceeds 200)
+  #     :bins => :scott    Scott's method    range/(3.5σ * n^(-1/3))
+  #              :fd       Freedman-Diaconis range/(2*iqrange *n^(-1/3)) (default)
+  #              :sturges  Sturges' method   log_2(n) + 1 (overly smooth for n > 200)
   #              :middle   the median between :fd, :scott, and :sturges
   #              <Integer> give the number of bins
   #              <Array>   specify the bins themselves
@@ -185,7 +187,7 @@ module Histogram
     opts = ({ :bin_boundary => :avg, :other_sets => [] }).merge(opts)
 
     bins = opts[:bins] if opts[:bins]
-    bins = :fd unless bins
+    bins = DEFAULT_BIN_METHOD unless bins
 
     bin_boundary = opts[:bin_boundary]
     other_sets = opts[:other_sets]
