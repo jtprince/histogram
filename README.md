@@ -8,7 +8,9 @@ and the wikipedia [histogram article](http://en.wikipedia.org/wiki/Histogram).
 
 ## NOTE
 
-The implementations for finding a bin number from the data itself have not yet been tested for correctness. (i.e., :fd, :sturges, or :scott)
+versions < 0.1.0 had a stupid bug in the Freedman-Diaconis method for finding
+bins.  So, if you weren't specifying your own number of bins or bin sizes,
+then you may not have been getting the optimal bin size by default.
 
 ### Typical usage:
 
