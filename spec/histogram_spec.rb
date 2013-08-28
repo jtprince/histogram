@@ -124,14 +124,39 @@ describe Histogram do
   end
 
   describe 'calculating bins' do
+    let(:even) {
+      [1,2,3,4,5,6,7,8].extend(Histogram)
+    }
+    let(:odd) { even[0..-2] }
+
+    let(:data_array) {
+      [0,1,2,2,2,2,2,3,3,3,3,3,3,3,3,3,5,5,9,9,10,20,15,15,15,16,17].extend(Histogram)
+    }
+
     it 'calculates :sturges, :scott, :fd, or :middle' do
-      answers = [6,3,4,4]
+      answers = [6,3,6,6]
       [:sturges, :scott, :fd, :middle].zip(answers) do |mth, answ|
-        ar = [0,1,2,2,2,2,2,3,3,3,3,3,3,3,3,3,5,5,9,9,10,20,15,15,15,16,17].extend(Histogram)
-        # these are merely frozen, not checked to see if correct
-        ar.number_of_bins(mth).should == answ
+        # these are **frozen**, not checked against other implementations, yet
+        # However, I've meticulously gone over the implementation of sturges, scott
+        # and fd and am confident they are correct.
+        # Note, there is some room for disagreement with how an interquartile
+        # range is calculated (I only have 2 simple methods implemented here).
+        # Also, I take the ceil of the resulting value and others may round.
+        data_array.number_of_bins(mth).should == answ
       end
     end
+
+    it 'calculates the interquartile range via moore_mccabe' do
+      Histogram.iqrange(even, method: :moore_mccabe).should == 4.0
+      Histogram.iqrange(odd, method: :moore_mccabe).should == 4.0
+    end
+
+    it 'calculates the interquartile range via tukey' do
+      Histogram.iqrange(even, method: :tukey).should == 4.0
+      Histogram.iqrange(odd, method: :tukey).should == 3.0
+    end
+
+
   end
 end
 

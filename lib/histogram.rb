@@ -35,24 +35,36 @@ module Histogram
       [_sum.to_f/_len, Math.sqrt(std_dev)]
     end
 
-    # still need to spec this method!
-    def iqrange(obj)
-      srted = obj.sort
+    # opts: 
+    #
+    #     defaults:
+    #     :method => :moore_mccabe, :tukey
+    #     :sorted => false
+    #   
+    def iqrange(obj, opts={})
+      opt = {method: :moore_mccabe, sorted: false}.merge( opts )
+      srted = opt[:sorted] ? obj : obj.sort 
       sz = srted.size
-      if sz % 2 == 0
-        median_index_hi = sz / 2
-        median_index_lo = (sz / 2) - 1
-        # need to check this line for accuracy:
-        dist = median_index_hi / 2 
-        fq = srted[median_index_hi + dist]
-        tq = srted[median_index_lo - dist]
-      else
-        median_index = sz / 2
-        dist = (median_index + 1) / 2
-        fq = srted[median_index - dist]
-        tq = srted[median_index + dist]
-      end
-      (tq - fq).to_f
+      answer = 
+        case opt[:method]
+        when :tukey
+          hi_idx = sz / 2
+          lo_idx = (sz % 2 == 0) ? hi_idx-1 : hi_idx
+          median(srted[hi_idx..-1]) - median(srted[0..lo_idx])
+        when :moore_mccabe
+          hi_idx = sz / 2
+          lo_idx = hi_idx - 1
+          hi_idx += 1 unless sz.even?
+          median(srted[hi_idx..-1]) - median(srted[0..lo_idx])
+        else
+          raise ArgumentError, "method must be :tukey"
+        end
+      answer.to_f
+    end
+
+    # finds median on a pre-sorted array
+    def median(sorted)
+      (sorted[(sorted.size - 1) / 2] + sorted[sorted.size / 2]) / 2.0
     end
   end
 
@@ -64,20 +76,20 @@ module Histogram
   # implementation}[http://www.mathworks.com/matlabcentral/fileexchange/21033-calculate-number-of-bins-for-histogram]
   # and the {histogram page on
   # wikipedia}[http://en.wikipedia.org/wiki/Histogram]
-  def number_of_bins(methd=:fd)
+  def number_of_bins(methd=:fd, quartile_method=:moore_mccabe)
     if methd == :middle
       [:scott, :sturges, :fd].map {|v| number_of_bins(v) }.sort[1]
     else
-      range = (self.max - self.min).to_f
       nbins = 
         case methd
         when :scott
+          range = (self.max - self.min).to_f
           (mean, stddev) = Histogram.sample_stats(self) 
           range / ( 3.5*stddev*(self.size**(-1.0/3)) )
         when :sturges
-          (Math::log(self.size)/Math::log(2)) + 1
+          1 + Math::log(self.size, 2)
         when :fd
-          range / ( 2*Histogram.iqrange(self)*self.size**(-1.0/3) ) 
+          2 * Histogram.iqrange(self, method: quartile_method) * (self.size**(-1.0/3))
         end
       nbins = 1 if nbins <= 0
       nbins.ceil.to_i
@@ -93,8 +105,8 @@ module Histogram
   #
   #     :bins => :fd       Freedman-Diaconis range/(2*iqrange *n^(-1/3)) (default)
   #              :scott    Scott's method    range/(3.5σ * n^(-1/3))
-  #              :sturges  Sturges' method   log_2(n) + 1
-  #              :middle   the median between three above
+  #              :sturges  Sturges' method   log_2(n) + 1 (overly smooth as n exceeds 200)
+  #              :middle   the median between :fd, :scott, and :sturges
   #              <Integer> give the number of bins
   #              <Array>   specify the bins themselves
   #
