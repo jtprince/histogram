@@ -8,7 +8,7 @@ and the wikipedia [histogram article](http://en.wikipedia.org/wiki/Histogram).
 
 ## NOTE
 
-versions < 0.1.0 had a stupid bug in the Freedman-Diaconis method for finding
+versions <= 0.1.0 had a stupid bug in the Freedman-Diaconis method for finding
 bins.  So, if you weren't specifying your own number of bins or bin sizes,
 then you may not have been getting the optimal bin size by default.
 
@@ -20,7 +20,7 @@ then you may not have been getting the optimal bin size by default.
     # by default, uses Scott's method to calculate optimal number of bins
     # and the bin values are midpoints between the bin edges 
     (bins, freqs) = data.histogram 
-    # equivalent to:  data.histogram(:fd, :bin_boundary => :avg)  
+    # equivalent to:  data.histogram(:scott, :bin_boundary => :avg)  
 
 ### Multiple types of binning behavior:
 
