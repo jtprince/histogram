@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["jtprince@gmail.com"]
   spec.description   = %q{gives objects the ability to 'histogram' in several useful ways}
   spec.summary       = %q{histograms data in different ways}
-  spec.homepage      = ""
+  spec.homepage      = "https://github.com/jtprince/histogram"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files`.split($/)
