@@ -6,12 +6,6 @@ Generates histograms similar to R's hist and numpy's histogram functions.
 Inspired somewhat by [Richard Cottons's matlab implementation](http://www.mathworks.com/matlabcentral/fileexchange/21033-calculate-number-of-bins-for-histogram)
 and the wikipedia [histogram article](http://en.wikipedia.org/wiki/Histogram).
 
-## NOTE
-
-versions <= 0.1.0 had a stupid bug in the Freedman-Diaconis method for finding
-bins.  So, if you weren't specifying your own number of bins or bin sizes,
-then you may not have been getting the optimal bin size by default.
-
 ### Typical usage:
 
     require 'histogram/array'  # enables Array#histogram
