@@ -1,4 +1,5 @@
 require "bundler/gem_tasks"
+require_relative "lib/histogram/version"
 
 require 'rspec/core'
 require 'rspec/core/rake_task'
@@ -10,10 +11,9 @@ task :default => :spec
 
 require 'rdoc/task'
 Rake::RDocTask.new do |rdoc|
-  version = File.exist?('VERSION') ? File.read('VERSION') : ""
-
+  version = Histogram::VERSION
   rdoc.rdoc_dir = 'rdoc'
-  rdoc.title = "rubabel #{version}"
+  rdoc.title = "histogram #{version}"
   rdoc.rdoc_files.include('README*')
   rdoc.rdoc_files.include('lib/**/*.rb')
 end
