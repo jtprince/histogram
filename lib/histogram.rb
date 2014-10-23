@@ -94,6 +94,7 @@ module Histogram
           2 * Histogram.iqrange(self, method: quartile_method) * (self.size**(-1.0/3))
         end
       nbins = 1 if nbins <= 0
+      nbins = 1 if nbins.nan?
       nbins.ceil.to_i
     end
   end
