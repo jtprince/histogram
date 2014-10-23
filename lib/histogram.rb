@@ -94,6 +94,7 @@ module Histogram
           2 * Histogram.iqrange(self, method: quartile_method) * (self.size**(-1.0/3))
         end
       nbins = 1 if nbins <= 0
+      nbins = 1 if nbins.nan?
       nbins.ceil.to_i
     end
   end
@@ -294,7 +295,7 @@ module Histogram
       # Create the scaling factor
 
       dmin = _min.to_f
-      conv = bins.to_f/(_max - _min)
+      conv = 0 == _max - _min ? 0 : bins.to_f/(_max - _min)
 
       _bins = 
         if self.is_a?(Array)
