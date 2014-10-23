@@ -295,7 +295,7 @@ module Histogram
       # Create the scaling factor
 
       dmin = _min.to_f
-      conv = 0 == _max - _min ? 0 : bins.to_f/(_max - _min)
+      conv = _max == _min ? 0 : bins.to_f/(_max - _min)
 
       _bins = 
         if self.is_a?(Array)
