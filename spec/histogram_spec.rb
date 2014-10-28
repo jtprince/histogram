@@ -2,6 +2,16 @@ require 'spec_helper'
 
 require 'histogram'
 
+class Float
+  def round(n=nil)
+    if n
+      ((n**10) * self).to_i/(10**n)
+    else
+      super()
+    end
+  end
+end
+
 RSpec::Matchers.define :be_within_rounding_error_of do |expected|
   match do |actual|
     (act, exp) = [actual, expected].map {|ar| ar.collect {|v| v.to_f.round(8) } }
@@ -91,14 +101,14 @@ shared_examples 'something that can histogram' do
 end
 
 describe Histogram do
-  tmp = { 
-    obj0: (0..10).to_a,
-    obj1: [0, 1, 1.5, 2.0, 5.0, 6.0, 7, 8, 9, 9],
-    obj2: [-1, 0, 1, 1.5, 2.0, 5.0, 6.0, 7, 8, 9, 9, 10], 
-    obj3: [1, 1, 2, 2, 3, 3, 4, 4, 4],
-    obj4: [2, 2, 2, 2, 2, 4],
-    obj5: [1,2,3,3,3,4,5,6,7,8],
-    obj6: [0,0,0,0,0]
+  tmp = {
+    :obj0 => (0..10).to_a,
+    :obj1 => [0, 1, 1.5, 2.0, 5.0, 6.0, 7, 8, 9, 9],
+    :obj2 => [-1, 0, 1, 1.5, 2.0, 5.0, 6.0, 7, 8, 9, 9, 10],
+    :obj3 => [1, 1, 2, 2, 3, 3, 4, 4, 4],
+    :obj4 => [2, 2, 2, 2, 2, 4],
+    :obj5 => [1,2,3,3,3,4,5,6,7,8],
+    :obj6 => [0,0,0,0,0]
   }
   data = tmp.each {|k,v| [k, v.map(&:to_f).extend(Histogram)] }
 
@@ -112,12 +122,12 @@ describe Histogram do
     it_behaves_like 'something that can histogram'
   end
 
-  have_narray = 
+  have_narray =
     begin
       require 'narray'
       NArray.respond_to?(:to_na)
       true
-    rescue
+    rescue LoadError
       false
     end
 
@@ -152,16 +162,15 @@ describe Histogram do
     end
 
     it 'calculates the interquartile range via moore_mccabe' do
-      Histogram.iqrange(even, method: :moore_mccabe).should == 4.0
-      Histogram.iqrange(odd, method: :moore_mccabe).should == 4.0
+      Histogram.iqrange(even, :method => :moore_mccabe).should == 4.0
+      Histogram.iqrange(odd, :method => :moore_mccabe).should == 4.0
     end
 
     it 'calculates the interquartile range via tukey' do
-      Histogram.iqrange(even, method: :tukey).should == 4.0
-      Histogram.iqrange(odd, method: :tukey).should == 3.0
+      Histogram.iqrange(even, :method => :tukey).should == 4.0
+      Histogram.iqrange(odd, :method => :tukey).should == 3.0
     end
 
 
   end
 end
-

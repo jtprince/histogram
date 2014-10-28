@@ -19,12 +19,16 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
 
-  [ "bundler ~> 1.3", 
+  [ "bundler ~> 1.3",
     "rake ~> 10.1.0",
     "simplecov ~> 0.7.1",
     "rspec ~> 2.13.0",
-    "narray",
+    "rdoc"
   ].each do |argline|
     spec.add_development_dependency *argline.split(' ', 2).compact
+  end
+
+  unless RUBY_PLATFORM =~ /java/
+    spec.add_development_dependency "narray"
   end
 end

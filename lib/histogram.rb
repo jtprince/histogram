@@ -1,5 +1,11 @@
 
-class NArray 
+class NArray
+end
+
+unless Math.respond_to?(:log2)
+  def Math.log2(num)
+    Math.log(num, 2)
+  end
 end
 
 module Histogram
@@ -44,8 +50,8 @@ module Histogram
     #     :sorted => false
     #   
     def iqrange(obj, opts={})
-      opt = {method: DEFAULT_QUARTILE_METHOD, sorted: false}.merge( opts )
-      srted = opt[:sorted] ? obj : obj.sort 
+      opt = {:method => DEFAULT_QUARTILE_METHOD, :sorted => false}.merge( opts )
+      srted = opt[:sorted] ? obj : obj.sort
       sz = srted.size
       answer = 
         case opt[:method]
@@ -89,9 +95,9 @@ module Histogram
           (mean, stddev) = Histogram.sample_stats(self) 
           range / ( 3.5*stddev*(self.size**(-1.0/3)) )
         when :sturges
-          1 + Math::log(self.size, 2)
+          1 + Math::log2(self.size)
         when :fd
-          2 * Histogram.iqrange(self, method: quartile_method) * (self.size**(-1.0/3))
+          2 * Histogram.iqrange(self, :method => quartile_method) * (self.size**(-1.0/3))
         end
       nbins = 1 if nbins <= 0
       nbins = 1 if nbins.nan?

@@ -1,5 +1,4 @@
 require "bundler/gem_tasks"
-require_relative "lib/histogram/version"
 
 require 'rspec/core'
 require 'rspec/core/rake_task'
