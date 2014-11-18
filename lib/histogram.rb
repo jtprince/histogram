@@ -53,6 +53,7 @@ module Histogram
       opt = {:method => DEFAULT_QUARTILE_METHOD, :sorted => false}.merge( opts )
       srted = opt[:sorted] ? obj : obj.sort
       sz = srted.size
+      return 0 if sz == 1
       answer = 
         case opt[:method]
         when :tukey
@@ -72,6 +73,7 @@ module Histogram
 
     # finds median on a pre-sorted array
     def median(sorted)
+      return sorted[0] if sorted.size == 1
       (sorted[(sorted.size - 1) / 2] + sorted[sorted.size / 2]) / 2.0
     end
   end

@@ -102,6 +102,10 @@ shared_examples 'something that can histogram' do
     bins, freq = obj6.histogram(:middle)
   end
 
+  it 'can handle an array of length 1' do
+    bins, freq = obj7.histogram(:middle)
+  end
+
 end
 
 describe Histogram do
@@ -112,7 +116,8 @@ describe Histogram do
     :obj3 => [1, 1, 2, 2, 3, 3, 4, 4, 4],
     :obj4 => [2, 2, 2, 2, 2, 4],
     :obj5 => [1,2,3,3,3,4,5,6,7,8],
-    :obj6 => [0,0,0,0,0]
+    :obj6 => [0,0,0,0,0],
+    :obj7 => [0]
   }
   data = tmp.each {|k,v| [k, v.map(&:to_f).extend(Histogram)] }
 
