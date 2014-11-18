@@ -65,6 +65,7 @@ Big thanks to those who have made contributions!
 
 * deal with zero std ([Greg Dean](https://github.com/gsdean))
 * support for 1.8.7 and jruby ([Kiera Radman](https://github.com/kierarad))
+* reorder nan checks (fix zero stdev arrays) [arjun810](https://github.com/arjun810)
 
 ## See Also
 
