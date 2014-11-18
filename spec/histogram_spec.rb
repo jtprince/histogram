@@ -98,6 +98,10 @@ shared_examples 'something that can histogram' do
     bins, freq = obj6.histogram
   end
 
+  it 'can handle 0 stddev for :middle' do
+    bins, freq = obj6.histogram(:middle)
+  end
+
 end
 
 describe Histogram do
