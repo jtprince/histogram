@@ -40,21 +40,27 @@ module Histogram
       end
       std_dev = _sum_sq - ((_sum * _sum)/_len)
       std_dev /= ( _len > 1 ? _len-1 : 1 )
-      [_sum.to_f/_len, Math.sqrt(std_dev)]
+      sqrt_of_std_dev =
+        begin
+          Math.sqrt(std_dev)
+        rescue Math::DomainError
+          0.0
+        end
+      [_sum.to_f/_len, sqrt_of_std_dev]
     end
 
-    # opts: 
+    # opts:
     #
     #     defaults:
     #     :method => :moore_mccabe, :tukey
     #     :sorted => false
-    #   
+    #
     def iqrange(obj, opts={})
       opt = {:method => DEFAULT_QUARTILE_METHOD, :sorted => false}.merge( opts )
       srted = opt[:sorted] ? obj : obj.sort
       sz = srted.size
       return 0 if sz == 1
-      answer = 
+      answer =
         case opt[:method]
         when :tukey
           hi_idx = sz / 2
@@ -90,25 +96,30 @@ module Histogram
     if methd == :middle
       [:scott, :sturges, :fd].map {|v| number_of_bins(v) }.sort[1]
     else
-      nbins = 
+      nbins =
         case methd
         when :scott
           range = (self.max - self.min).to_f
-          (mean, stddev) = Histogram.sample_stats(self) 
-          range / ( 3.5*stddev*(self.size**(-1.0/3)) )
+          (mean, stddev) = Histogram.sample_stats(self)
+          if stddev == 0.0
+            1
+          else
+            range / ( 3.5*stddev*(self.size**(-1.0/3)) )
+          end
         when :sturges
           1 + Math::log2(self.size)
         when :fd
           2 * Histogram.iqrange(self, :method => quartile_method) * (self.size**(-1.0/3))
         end
-      nbins = 1 if nbins.nan?
-      nbins = 1 if nbins <= 0
+      if nbins > self.size || nbins.to_f.nan? || nbins <= 0
+        nbins = 1
+      end
       nbins.ceil.to_i
     end
   end
 
   # Returns [bins, freqs]
-  # 
+  #
   # histogram(bins, opts)
   # histogram(opts)
   #
@@ -127,23 +138,23 @@ module Histogram
   #     :bin_width => <float> width of a bin (overrides :bins)
   #     :min => <float> # explicitly set the min
   #     :max => <float> # explicitly set the max val
-  #     
+  #
   #     :other_sets => an array of other sets to histogram
   #
-  # Examples 
+  # Examples
   #
   #    require 'histogram/array'
   #    ar = [-2,1,2,3,3,3,4,5,6,6]
   #    # these return: [bins, freqencies]
   #    ar.histogram(20)                  # use 20 bins
   #    ar.histogram([-3,-1,4,5,6], :bin_boundary => :avg) # custom bins
-  #    
+  #
   #    # returns [bins, freq1, freq2 ...]
   #    (bins, *freqs) = ar.histogram(30, :bin_boundary => :avg, :other_sets => [3,3,4,4,5], [-1,0,0,3,3,6])
   #    (ar_freqs, other1, other2) = freqs
   #
   #    # histogramming with weights
-  #    w_weights.histogram(20, :weights => [3,3,8,8,9,9,3,3,3,3]) 
+  #    w_weights.histogram(20, :weights => [3,3,8,8,9,9,3,3,3,3])
   #
   #    # with NArray
   #    require 'histogram/narray'
@@ -165,7 +176,7 @@ module Histogram
   #   to share the exact same bins. In this case returns [bins, freqs(caller),
   #   freqs1, freqs2 ...]
   # * Can also deal with weights.  :weights should provide parallel arrays to
-  #   the caller and any :other_sets provided.   
+  #   the caller and any :other_sets provided.
   def histogram(*args)
     make_freqs_proc = lambda do |obj, len|
       if obj.is_a?(Array)
@@ -202,13 +213,13 @@ module Histogram
     other_sets = opts[:other_sets]
 
     bins_array_like = bins.kind_of?(Array) || bins.kind_of?(NArray) || opts[:bin_width]
-    all = [self] + other_sets 
+    all = [self] + other_sets
 
     if bins.is_a?(Symbol)
       bins = number_of_bins(bins)
     end
 
-    weights = 
+    weights =
       if opts[:weights]
         have_frac_freqs = true
         opts[:weights][0].is_a?(Numeric) ? [ opts[:weights] ] : opts[:weights]
@@ -217,8 +228,8 @@ module Histogram
       end
 
     # we need to know the limits of the bins if we need to define our own bins
-    if opts[:bin_width] || !bins_array_like 
-      calc_min, calc_max = 
+    if opts[:bin_width] || !bins_array_like
+      calc_min, calc_max =
         unless opts[:min] && opts[:max]
           (mins, maxs) = all.map {|ar| Histogram.minmax(ar) }.transpose
           [mins.min, maxs.max]
@@ -238,9 +249,9 @@ module Histogram
       ########################################################
       # ARRAY BINS:
       ########################################################
-      _bins = 
+      _bins =
         if bins.is_a?(Array)
-          bins.map {|v| v.to_f } 
+          bins.map {|v| v.to_f }
         elsif bins.is_a?(NArray)
           bins.to_f
         end
@@ -250,11 +261,11 @@ module Histogram
 
           _freqs = make_freqs_proc.call(xvals, bins.size)
 
-          break_points = [] 
+          break_points = []
           (0...(bins.size)).each do |i|
             bin = bins[i]
             break if i == (bins.size - 1)
-            break_points << avg_ints(bin,bins[i+1]) 
+            break_points << avg_ints(bin,bins[i+1])
           end
           (0...(xvals.size)).each do |i|
             val = xvals[i]
@@ -262,9 +273,9 @@ module Histogram
             if val < break_points.first
               _freqs[0] += height
             elsif val >= break_points.last
-              _freqs[-1] += height 
+              _freqs[-1] += height
             else
-              (0...(break_points.size-1)).each do |i| 
+              (0...(break_points.size-1)).each do |i|
                 if val >= break_points[i] && val < break_points[i+1]
                   _freqs[i+1] += height
                   break
@@ -272,7 +283,7 @@ module Histogram
               end
             end
           end
-          _freqs 
+          _freqs
         end
       when :min
         freqs_ar = all.zip(weights).map do |xvals, yvals|
@@ -305,7 +316,7 @@ module Histogram
       dmin = _min.to_f
       conv = _max == _min ? 0 : bins.to_f/(_max - _min)
 
-      _bins = 
+      _bins =
         if self.is_a?(Array)
           Array.new(bins)
         elsif self.is_a?(NArray)
@@ -335,12 +346,20 @@ module Histogram
       iconv = 1.0/conv
       case bin_boundary
       when :avg
-        (0...bins).each do |i|
-          _bins[i] = ((i+0.5) * iconv) + dmin
+        if bins == 1
+          _bins[0] = self.to_a.inject(0.0) {|sum, val| sum + val } / self.size
+        else
+          (0...bins).each do |i|
+            _bins[i] = ((i+0.5) * iconv) + dmin
+          end
         end
       when :min
-        (0...bins).each do |i|
-          _bins[i] = (i * iconv) + dmin
+        if bins == 1
+          _bins[0] = self.min
+        else
+          (0...bins).each do |i|
+            _bins[i] = (i * iconv) + dmin
+          end
         end
       end
     end
