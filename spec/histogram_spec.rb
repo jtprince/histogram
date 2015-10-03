@@ -116,6 +116,12 @@ shared_examples 'something that can histogram' do
     freq.to_a.should == [5]
   end
 
+  it 'sets all bin values to the same if min equals max' do
+    bins, freq = obj6.histogram(2)
+    bins.to_a.should == [0.0, 0.0]
+    freq.to_a.should == [5.0, 0.0]
+  end
+
 end
 
 describe Histogram do

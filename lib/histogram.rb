@@ -72,7 +72,7 @@ module Histogram
           hi_idx += 1 unless sz.even?
           median(srted[hi_idx..-1]) - median(srted[0..lo_idx])
         else
-          raise ArgumentError, "method must be :tukey"
+          raise ArgumentError, "method must be :tukey or :moore_mccabe"
         end
       answer.to_f
     end
@@ -318,9 +318,9 @@ module Histogram
       # NUMBER OF BINS:
       ########################################################
       # Create the scaling factor
-
       dmin = _min.to_f
-      conv = _max == _min ? 0 : bins.to_f/(_max - _min)
+      min_equals_max = _max == _min
+      conv = min_equals_max ? 0 : bins.to_f/(_max - _min)
 
       _bins =
         if self.is_a?(Array)
@@ -352,20 +352,18 @@ module Histogram
       iconv = 1.0/conv
       case bin_boundary
       when :avg
-        if bins == 1
-          _bins[0] = self.to_a.inject(0.0) {|sum, val| sum + val } / self.size
-        else
-          (0...bins).each do |i|
-            _bins[i] = ((i+0.5) * iconv) + dmin
-          end
+        if min_equals_max
+          set_bin_value = self.to_a.inject(0.0) {|sum, val| sum + val } / self.size
+        end
+        (0...bins).each do |i|
+          _bins[i] = min_equals_max ? set_bin_value : ((i+0.5) * iconv) + dmin
         end
       when :min
-        if bins == 1
-          _bins[0] = self.min
-        else
-          (0...bins).each do |i|
-            _bins[i] = (i * iconv) + dmin
-          end
+        if min_equals_max
+          set_bin_value = self.min
+        end
+        (0...bins).each do |i|
+          _bins[i] = min_equals_max ? set_bin_value : (i * iconv) + dmin
         end
       end
     end
