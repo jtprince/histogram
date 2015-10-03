@@ -88,11 +88,15 @@ module Histogram
   #
   # middle is the median between the other three values
   #
+  # Note: always returns 1 if all values are the same.
+  #
   # inspired by {Richard Cotton's matlab
   # implementation}[http://www.mathworks.com/matlabcentral/fileexchange/21033-calculate-number-of-bins-for-histogram]
   # and the {histogram page on
   # wikipedia}[http://en.wikipedia.org/wiki/Histogram]
   def number_of_bins(methd=DEFAULT_BIN_METHOD, quartile_method=DEFAULT_QUARTILE_METHOD)
+    return 1 if self.to_a.uniq.size == 1
+
     if methd == :middle
       [:scott, :sturges, :fd].map {|v| number_of_bins(v) }.sort[1]
     else
@@ -171,6 +175,8 @@ module Histogram
   #   (so, values lower than first bin are not included, but all values
   #   higher, than last bin are included.  Current implementation of custom
   #   bins is slow.
+  # * If the number of bins must be determined and all values are the same,
+  #   will use 1 bin.
   # * if other_sets are supplied, the same bins will be used for all the sets.
   #   It is useful if you just want a certain number of bins and for the sets
   #   to share the exact same bins. In this case returns [bins, freqs(caller),

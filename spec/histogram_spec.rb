@@ -110,6 +110,12 @@ shared_examples 'something that can histogram' do
     bins, freq = obj8.histogram
   end
 
+  it 'uses 1 bin if all values are the same' do
+    bins, freq = obj6.histogram(:sturges)
+    bins.to_a.should == [0]
+    freq.to_a.should == [5]
+  end
+
 end
 
 describe Histogram do
