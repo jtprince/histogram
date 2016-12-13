@@ -343,7 +343,7 @@ module Histogram
           if index == bins
             index -= 1
           end
-          _freqs[index] += height
+          _freqs[index] += height if _freqs[index]
         end
         _freqs
       end
